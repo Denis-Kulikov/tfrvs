@@ -7,19 +7,6 @@
 
 using namespace std;
 
-vector<vector<double>> compute_payoff_matrix(int n, double c1, double c2, double c3) {
-    vector<vector<double>> C(n, vector<double>(n, 0.0));
-
-    for (int i = 0; i < n; i++) { // ВЦ 
-        for (int j = 0; j < n; j++) { // Диспетчер
-            if (i >= j)  C[i][j] = j * c1 + (i - j) * c2; // i >= j
-            else         C[i][j] = i * c2 + (j - i) * c3; // i <  j
-        }
-    }
-
-    return C;
-}
-
 void print_matrix(const vector<vector<double>>& C) {
     cout << "Matrix C:" << endl;
     for (int i = 0; i < C.size(); i++) {
@@ -33,14 +20,22 @@ void print_matrix(const vector<vector<double>>& C) {
 class brown_method {
 public:
     brown_method(const vector<vector<double>>& C_)
-        : C(C_) {
-        I = C.size();
-        J = C[0].size();
+        : Ci(C_) {
+        I = Ci.size();
+        J = Ci[0].size();
+
+        // Транспонируем матрицу
+        for (size_t i = 0; i < Ci.size(); ++i) {
+            for (size_t j = 0; j < Ci[i].size(); ++j) {
+                Cj[j][i] = Ci[i][j];
+            }
+        }
     }
 
     double get_V() { return V; }
     double get_iterations() { return iterations; }
     vector<double> get_x() {
+        std::cout << x.size() << std::endl;
         vector<double> x_(x.size());
         for (int j = 0; j < J; ++j)
             x_[j] = x[j] / iterations;
@@ -56,41 +51,59 @@ public:
     }
 
     void start(double epsilon) {
-        int index = rand() % I;
+        int index = 2;
+        // int index = rand() % I;
         V = 0;
         V_prev = numeric_limits<double>::infinity();
         iterations = 0;
-        X = vector<double>(J, 0);
         Y = vector<double>(I, 0);
-        x = vector<double>(J, 0);
         y = vector<double>(I, 0);
+        X = vector<double>(J, 0);
+        x = vector<double>(J, 0);
 
         do {
             ++iterations;
             index = first(index);
             calculate_V_simple();
-        } while (fabs(V - V_prev) > epsilon); // do {...} while(); - потому что iterations == 0 при запуске
+
+            for (int j = 0; j < J; ++j)
+                std::cout << X[j] << " ";   
+            std::cout << std::endl;
+            for (int i = 0; i < I; ++i)
+                std::cout << Y[i] << " ";   
+            std::cout << std::endl;
+
+            for (int j = 0; j < J; ++j)
+                std::cout << x[j] << " ";   
+            std::cout << std::endl;
+            for (int i = 0; i < I; ++i)
+                std::cout << y[i] << " ";   
+            std::cout << std::endl;
+            std::cout << std::endl;
+        } while (iterations < 10); // do {...} while(); - потому что iterations == 0 при запуске
+    
+
     }
 
 private:
     int first(int index) {
         for (int j = 0; j < J; ++j) 
-            X[j] += C[index][j];
+            X[j] += Ci[index][j];
 
         auto min_value = std::min_element(X.begin(), X.end());
         auto index_min = std::distance(X.begin(), min_value);
-        ++y[index_min];
+        ++x[index_min];
 
         return second(index_min);
     }
 
     int second(int index) {
         for (int i = 0; i < I; ++i)
-            Y[i] += C[i][index];
+            Y[i] += Ci[i][index];
 
         auto max_value = std::max_element(Y.begin(), Y.end());
         auto index_max = std::distance(Y.begin(), max_value);
-        ++x[index_max];
+        ++y[index_max];
 
         return index_max;
     }
@@ -113,14 +126,15 @@ private:
 
         for (int i = 0; i < I; ++i) {
             for (int j = 0; j < J; ++j) {
-                v += C[i][j] * x_[j] * y_[i];
+                v += Ci[i][j] * x_[j] * y_[i];
             }
         }
 
         V = v;
     }
 
-    const vector<vector<double>>& C; 
+    vector<vector<double>> Ci; // изначальная матрица
+    vector<vector<double>> Cj; // транспонированная
     vector<double> X, Y;
     vector<double> x, y;
     double V;
@@ -131,25 +145,33 @@ private:
 };
 
 int main() {
-    double c1 = 1.0, c2 = 2.0, c3 = 3.0, epsilon = 0.000001;
     int n = 11;
 
-    vector<vector<double>> C = compute_payoff_matrix(n, c1, c2, c3);
-    print_matrix(C);
+    vector<vector<double>> Ci;
+    vector<double> i1, i2, i3;
+    i1 = {2, 0, 9, 6};
+    i2 = {1, 3, 6, 0};
+    i3 = {4, 2, 1, 3};
 
-    brown_method bm(C);
-    bm.start(epsilon);
+    Ci.push_back(i1);
+    Ci.push_back(i2);
+    Ci.push_back(i3);
+
+    print_matrix(Ci);
+
+    brown_method bm(Ci);
+    bm.start(1);
 
     cout << "V ≈ " << bm.get_V() << endl;
     cout << "iterations = " << bm.get_iterations() << endl;
-    cout << "x = ";
-    for (const auto& it : bm.get_x())
-        cout << it << " ";
-    cout << endl;
-    cout << "y = ";
-    for (const auto& it : bm.get_y())
-        cout << it << " ";
-    cout << endl;
+    // cout << "x = ";
+    // for (const auto& it : bm.get_x())
+    //     cout << it << " ";
+    // cout << endl;
+    // cout << "y = ";
+    // for (const auto& it : bm.get_y())
+    //     cout << it << " ";
+    // cout << endl;
 
     return 0;
 }
