@@ -28,7 +28,6 @@ public:
     double get_V() { return V; }
     double get_iterations() { return iterations; }
     vector<double> get_x() {
-        std::cout << x.size() << std::endl;
         vector<double> x_(x.size());
         for (int j = 0; j < J; ++j)
             x_[j] = x[j] / iterations;
@@ -44,7 +43,7 @@ public:
     }
 
     void start(double epsilon) {
-        int index = 2;
+        int index = 0;
         // int index = rand() % I;
         V = 0;
         V_prev = numeric_limits<double>::infinity();
@@ -57,22 +56,7 @@ public:
         do {
             ++iterations;
             index = first(index);
-            calculate_V_simple();
-
-            for (int j = 0; j < J; ++j)
-                std::cout << X[j] << " ";   
-            std::cout << std::endl;
-            for (int i = 0; i < I; ++i)
-                std::cout << Y[i] << " ";   
-            std::cout << std::endl;
-
-            for (int j = 0; j < J; ++j)
-                std::cout << x[j] << " ";   
-            std::cout << std::endl;
-            for (int i = 0; i < I; ++i)
-                std::cout << y[i] << " ";   
-            std::cout << std::endl;
-            std::cout << std::endl;
+            calculate_V();
         } while (iterations < 10); // do {...} while(); - потому что iterations == 0 при запуске
     
 
@@ -99,16 +83,6 @@ private:
         ++y[index_max];
 
         return index_max;
-    }
-
-    void calculate_V_simple() {
-        V_prev = V;
-        double min_value = *std::min_element(Y.begin(), Y.end());
-        double max_value = *std::max_element(X.begin(), X.end());
-
-        double offset = (max_value - min_value) / 2;
-        double mid = min_value + offset;
-        V = mid / iterations; // min_value / iterations <= V <= max_value / iterations
     }
 
     void calculate_V() {
@@ -141,13 +115,13 @@ int main() {
 
     vector<vector<double>> C;
     vector<double> i1, i2, i3;
-    i1 = {2, 0, 9, 6};
-    i2 = {1, 3, 6, 0};
-    i3 = {4, 2, 1, 3};
+    i1 = {6, 9, 0, 2};
+    i2 = {0, 6, 3, 1};
+    i3 = {3, 1, 2, 4};
 
-    C.push_back(i1);
-    C.push_back(i2);
     C.push_back(i3);
+    C.push_back(i2);
+    C.push_back(i1);
 
     print_matrix(C);
 
@@ -156,14 +130,14 @@ int main() {
 
     cout << "V ≈ " << bm.get_V() << endl;
     cout << "iterations = " << bm.get_iterations() << endl;
-    // cout << "x = ";
-    // for (const auto& it : bm.get_x())
-    //     cout << it << " ";
-    // cout << endl;
-    // cout << "y = ";
-    // for (const auto& it : bm.get_y())
-    //     cout << it << " ";
-    // cout << endl;
+    cout << "x = ";
+    for (const auto& it : bm.get_x())
+        cout << it << " ";
+    cout << endl;
+    cout << "y = ";
+    for (const auto& it : bm.get_y())
+        cout << it << " ";
+    cout << endl;
 
     return 0;
 }
