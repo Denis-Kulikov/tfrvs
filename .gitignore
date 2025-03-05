@@ -1,4 +1,10 @@
 *.o
 *.a
 
+*.obj
+*.ilk
+*.pdb
+ex.exe
+
 ex
+doc.pdf

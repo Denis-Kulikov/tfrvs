@@ -126,7 +126,7 @@ private:
         V = v;
     }
 
-    const vector<vector<double>>& C; 
+    const vector<vector<double>> C; 
     vector<double> X, Y;
     vector<double> x, y;
     double V;
