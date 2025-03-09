@@ -1,1 +1,0 @@
-cl stdc++17 Feex.exe main.cpp parser.cpp math.cpp

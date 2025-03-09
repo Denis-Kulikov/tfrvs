@@ -46,6 +46,7 @@ double calculateT(int N, double lambda, int m, double mu, int n1) {
     }
     return product1 + sum;
 }
+
 double computeT(int N, int m, int n, double lambda, double mu) {
     double T = 1.0 / MU(0);
     if (n == 1) return T;
